@@ -218,70 +218,95 @@ function QuizView({ onComplete }) {
     }))
   }
 
-  const stepNames = ['Who is this for?', 'How old are they?', 'What do you know about them?', 'What\'s your budget?', 'What\'s the occasion?']
+  const nextLabel = () => {
+    if (step === 4) return '🎁 Find their gift'
+    if (step === 0 && answers.relationship) {
+      const r = RELATIONSHIPS.find(r => r.v === answers.relationship)
+      return r ? `Shopping for ${r.l.toLowerCase()} →` : 'Next →'
+    }
+    if (step === 3 && answers.budget) {
+      const b = BUDGETS.find(b => b.v === answers.budget)
+      return b ? `${b.l} works →` : 'Next →'
+    }
+    return 'Next →'
+  }
+
+  const optCard = (selected) => ({
+    display:'flex', alignItems:'center', gap:10, padding:'14px 18px',
+    borderRadius:14, border:`2px solid ${selected ? T.gold : T.border}`,
+    background: selected ? T.goldLight : T.white,
+    color: selected ? T.navyDark : T.charcoal,
+    fontFamily:F, fontWeight:700, fontSize:14, cursor:'pointer',
+    transition:'all .15s', textAlign:'left', width:'100%'
+  })
+
+  const chipStyle = (selected) => ({
+    display:'flex', alignItems:'center', gap:6, padding:'10px 16px',
+    borderRadius:50, border:`2px solid ${selected ? T.gold : T.border}`,
+    background: selected ? T.goldLight : T.white,
+    color: selected ? T.navyDark : T.gray,
+    fontFamily:F, fontWeight:700, fontSize:13, cursor:'pointer',
+    transition:'all .15s', whiteSpace:'nowrap'
+  })
 
   return (
-    <div style={{minHeight:'100vh',background:T.cream}}>
-      {/* Progress bar */}
-      <div style={{background:T.white,borderBottom:`1px solid ${T.border}`,padding:'12px 20px'}}>
-        <div style={{maxWidth:600,margin:'0 auto'}}>
-          <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
-            <span style={{fontSize:13,fontWeight:700,color:T.navy,fontFamily:F}}>{stepNames[step]}</span>
-            <span style={{fontSize:12,color:T.grayLight,fontFamily:F}}>Step {step+1} of {totalSteps}</span>
-          </div>
-          <div style={{background:T.navyLight,borderRadius:50,height:6,overflow:'hidden'}}>
-            <div style={{background:`linear-gradient(90deg,${T.navy},${T.navyMid})`,height:'100%',width:`${pct}%`,borderRadius:50,transition:'width .4s ease'}}/>
-          </div>
-        </div>
+    <div style={{minHeight:'100vh', background:T.cream}}>
+      <style>{"@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.qfu{animation:fadeUp .25s ease}"}</style>
+      <div style={{background:T.navyLight, height:4, position:'sticky', top:52, zIndex:99}}>
+        <div style={{background:`linear-gradient(90deg,${T.navy},${T.gold})`, height:'100%', width:`${pct}%`, transition:'width .4s ease'}}/>
       </div>
+      <div style={{maxWidth:600, margin:'0 auto', padding:'40px 20px 60px'}}>
+        <div className="qfu" key={step}>
 
-      <div style={{maxWidth:640,margin:'0 auto',padding:'32px 20px'}}>
-        <Card style={{padding:'28px 24px'}}>
-
-          {/* Step 0: Relationship */}
           {step === 0 && (
             <>
-              <h2 style={{fontSize:22,fontWeight:900,color:T.navy,margin:'0 0 6px',fontFamily:F}}>Who is this gift for?</h2>
-              <p style={{fontSize:14,color:T.gray,margin:'0 0 20px',lineHeight:1.6,fontFamily:F2}}>Tell us your relationship to the recipient.</p>
-              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <h2 style={{fontSize:'clamp(22px,5vw,30px)', fontWeight:900, color:T.navy, margin:'0 0 8px', fontFamily:F, lineHeight:1.2}}>Who's the lucky person?</h2>
+              <p style={{fontSize:14, color:T.gray, margin:'0 0 24px', fontFamily:F2}}>Pick the closest match.</p>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
                 {RELATIONSHIPS.map(r => (
-                  <Chip key={r.v} emoji={r.e} label={r.l} selected={answers.relationship===r.v} onClick={()=>setAnswers(a=>({...a,relationship:r.v}))}/>
+                  <button key={r.v} onClick={()=>setAnswers(a=>({...a,relationship:r.v}))} style={optCard(answers.relationship===r.v)}>
+                    <span style={{fontSize:20}}>{r.e}</span>{r.l}
+                  </button>
                 ))}
               </div>
             </>
           )}
 
-          {/* Step 1: Age */}
           {step === 1 && (
             <>
-              <h2 style={{fontSize:22,fontWeight:900,color:T.navy,margin:'0 0 6px',fontFamily:F}}>How old are they?</h2>
-              <p style={{fontSize:14,color:T.gray,margin:'0 0 20px',lineHeight:1.6,fontFamily:F2}}>Roughly is fine. Even "not sure" works.</p>
-              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <h2 style={{fontSize:'clamp(22px,5vw,30px)', fontWeight:900, color:T.navy, margin:'0 0 8px', fontFamily:F, lineHeight:1.2}}>How old are they, roughly?</h2>
+              <p style={{fontSize:14, color:T.gray, margin:'0 0 24px', fontFamily:F2}}>Ballpark is totally fine.</p>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
                 {AGE_RANGES.map(a => (
-                  <Chip key={a.v} label={a.l} selected={answers.age===a.v} onClick={()=>setAnswers(x=>({...x,age:a.v}))}/>
+                  <button key={a.v} onClick={()=>setAnswers(x=>({...x,age:a.v}))} style={optCard(answers.age===a.v)}>
+                    {a.l}
+                  </button>
                 ))}
               </div>
             </>
           )}
 
-          {/* Step 2: Interests + clue */}
           {step === 2 && (
             <>
-              <h2 style={{fontSize:22,fontWeight:900,color:T.navy,margin:'0 0 6px',fontFamily:F}}>What do you know about them?</h2>
-              <p style={{fontSize:14,color:T.gray,margin:'0 0 16px',lineHeight:1.6,fontFamily:F2}}>Tap what fits — or just tell us the one thing you know about them. Either works, and more specific always wins.</p>
-              <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:20}}>
+              <h2 style={{fontSize:'clamp(22px,5vw,30px)', fontWeight:900, color:T.navy, margin:'0 0 8px', fontFamily:F, lineHeight:1.2}}>What do you know about them?</h2>
+              <p style={{fontSize:14, color:T.gray, margin:'0 0 16px', fontFamily:F2}}>Tap whatever fits, or just type the one thing you know. Even something random like "loves his boat" is plenty.</p>
+              <div style={{display:'flex', gap:8, flexWrap:'wrap', marginBottom:16}}>
                 {INTERESTS.map(i => (
-                  <Chip key={i.v} emoji={i.e} label={i.l} selected={answers.interests.includes(i.v)} onClick={()=>toggleInterest(i.v)}/>
+                  <button key={i.v} onClick={()=>toggleInterest(i.v)} style={chipStyle(answers.interests.includes(i.v))}>
+                    <span>{i.e}</span>{i.l}
+                  </button>
                 ))}
               </div>
-              {answers.interests.length > 0 && <p style={{fontSize:11,color:T.grayLight,margin:'-12px 0 16px',fontFamily:F}}>{answers.interests.length}/3 selected</p>}
-              <div style={{borderTop:`1px solid ${T.border}`,paddingTop:16}}>
-                <label style={{fontSize:13,fontWeight:700,color:T.navy,display:'block',marginBottom:8,fontFamily:F}}>Anything specific? <span style={{fontWeight:400,color:T.grayLight}}>(totally optional)</span></label>
+              {answers.interests.length > 0 && <p style={{fontSize:11, color:T.grayLight, margin:'-8px 0 14px', fontFamily:F}}>{answers.interests.length}/3 selected</p>}
+              <div style={{borderTop:`1px solid ${T.border}`, paddingTop:16}}>
+                <label style={{fontSize:13, fontWeight:700, color:T.navy, display:'block', marginBottom:8, fontFamily:F}}>
+                  Anything specific? <span style={{fontWeight:400, color:T.grayLight}}>(totally optional)</span>
+                </label>
                 <textarea
                   value={answers.clue}
                   onChange={e=>setAnswers(a=>({...a,clue:e.target.value}))}
-                  placeholder={`e.g. "He loves his boat" · "She's always cold" · "Just got into sourdough" · "Huge Taylor Swift fan"`}
-                  style={{width:'100%',border:`2px solid ${T.border}`,borderRadius:T.rSm,padding:'12px 14px',fontSize:13,fontFamily:F2,resize:'vertical',minHeight:72,color:T.charcoal,background:T.white,outline:'none',boxSizing:'border-box',lineHeight:1.6}}
+                  placeholder={"He loves his boat · She\'s always cold · Just got into sourdough · Huge Taylor Swift fan"}
+                  style={{width:'100%', border:`2px solid ${T.border}`, borderRadius:12, padding:'12px 14px', fontSize:13, fontFamily:F2, resize:'vertical', minHeight:72, color:T.charcoal, background:T.white, outline:'none', boxSizing:'border-box', lineHeight:1.6}}
                   onFocus={e=>e.target.style.borderColor=T.gold}
                   onBlur={e=>e.target.style.borderColor=T.border}
                 />
@@ -289,71 +314,96 @@ function QuizView({ onComplete }) {
             </>
           )}
 
-          {/* Step 3: Budget */}
           {step === 3 && (
             <>
-              <h2 style={{fontSize:22,fontWeight:900,color:T.navy,margin:'0 0 6px',fontFamily:F}}>What's your budget?</h2>
-              <p style={{fontSize:14,color:T.gray,margin:'0 0 20px',lineHeight:1.6,fontFamily:F2}}>We'll find the best option in your range.</p>
-              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <h2 style={{fontSize:'clamp(22px,5vw,30px)', fontWeight:900, color:T.navy, margin:'0 0 8px', fontFamily:F, lineHeight:1.2}}>What are you thinking to spend?</h2>
+              <p style={{fontSize:14, color:T.gray, margin:'0 0 24px', fontFamily:F2}}>We will find the best option right in that range.</p>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
                 {BUDGETS.map(b => (
-                  <Chip key={b.v} emoji={b.e} label={b.l} selected={answers.budget===b.v} onClick={()=>setAnswers(a=>({...a,budget:b.v}))} wide/>
+                  <button key={b.v} onClick={()=>setAnswers(a=>({...a,budget:b.v}))} style={optCard(answers.budget===b.v)}>
+                    <span style={{fontSize:20}}>{b.e}</span>{b.l}
+                  </button>
                 ))}
               </div>
             </>
           )}
 
-          {/* Step 4: Occasion */}
           {step === 4 && (
             <>
-              <h2 style={{fontSize:22,fontWeight:900,color:T.navy,margin:'0 0 6px',fontFamily:F}}>What's the occasion?</h2>
-              <p style={{fontSize:14,color:T.gray,margin:'0 0 20px',lineHeight:1.6,fontFamily:F2}}>This helps us frame the recommendation perfectly.</p>
-              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <h2 style={{fontSize:'clamp(22px,5vw,30px)', fontWeight:900, color:T.navy, margin:'0 0 8px', fontFamily:F, lineHeight:1.2}}>What's the occasion?</h2>
+              <p style={{fontSize:14, color:T.gray, margin:'0 0 24px', fontFamily:F2}}>This shapes how we frame the recommendation.</p>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
                 {OCCASIONS.map(o => (
-                  <Chip key={o.v} emoji={o.e} label={o.l} selected={answers.occasion===o.v} onClick={()=>setAnswers(a=>({...a,occasion:o.v}))}/>
+                  <button key={o.v} onClick={()=>setAnswers(a=>({...a,occasion:o.v}))} style={optCard(answers.occasion===o.v)}>
+                    <span style={{fontSize:20}}>{o.e}</span>{o.l}
+                  </button>
                 ))}
               </div>
             </>
           )}
 
-          {/* Navigation */}
-          <div style={{display:'flex',gap:10,marginTop:28,paddingTop:20,borderTop:`1px solid ${T.border}`}}>
-            {step > 0 && <Btn variant="gray" onClick={()=>setStep(s=>s-1)}>← Back</Btn>}
+          <div style={{display:'flex', gap:10, marginTop:32}}>
+            {step > 0 && <Btn variant="gray" onClick={()=>setStep(s=>s-1)} style={{flexShrink:0}}>← Back</Btn>}
             <Btn
-              style={{flex:1, opacity:canNext()?1:0.4, background:step===totalSteps-1?T.gold:T.navy, color:step===totalSteps-1?T.navyDark:'#fff'}}
-              onClick={()=>{
-                if (!canNext()) return
-                if (step < totalSteps - 1) setStep(s=>s+1)
-                else onComplete(answers)
-              }}
+              style={{flex:1, opacity:canNext()?1:0.35, background:step===totalSteps-1?T.gold:T.navy, color:step===totalSteps-1?T.navyDark:'#fff', fontSize:15, padding:'13px 22px'}}
+              onClick={()=>{ if(!canNext()) return; if(step < totalSteps-1) setStep(s=>s+1); else onComplete(answers) }}
             >
-              {step < totalSteps - 1 ? 'Next →' : '🎁 Find the perfect gift'}
+              {nextLabel()}
             </Btn>
           </div>
-          <p style={{fontSize:11,color:T.grayLight,textAlign:'center',marginTop:10,fontFamily:F2}}>No account needed · Free to use · Results in seconds</p>
-        </Card>
+          <p style={{fontSize:11, color:T.grayLight, textAlign:'center', marginTop:10, fontFamily:F2}}>Free to use · No account needed</p>
+        </div>
       </div>
     </div>
   )
 }
 
+
+// ── LOAD STAGES ───────────────────────────────────────────────────────────────
+const LOAD_STAGES = [
+  {label:'Reading your answers...',pct:15},
+  {label:'Thinking through their interests...',pct:32},
+  {label:'Finding something specific...',pct:52},
+  {label:'Checking the details...',pct:72},
+  {label:'Adding a book recommendation...',pct:88},
+  {label:'Almost ready!',pct:97},
+]
+
 // ── LOADING VIEW ───────────────────────────────────────────────────────────────
-function LoadingView({ clue }) {
-  const [msg, setMsg] = React.useState(0)
-  const msgs = clue?.trim()
-    ? [`Working with "${clue}"...`, 'Finding something specific...', 'Almost there...']
-    : ['Thinking through options...', 'Finding the right fit...', 'Almost there...']
-  React.useEffect(() => {
-    const t = setInterval(() => setMsg(m => (m+1) % msgs.length), 1800)
-    return () => clearInterval(t)
-  }, [])
+function LoadingView({ stage, clue }) {
+  const s = LOAD_STAGES[Math.min(stage, LOAD_STAGES.length-1)]
   return (
-    <div style={{minHeight:'100vh',background:T.cream,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20}}>
-      <div style={{fontSize:48}}>🎁</div>
-      <div style={{fontSize:18,fontWeight:800,color:T.navy,fontFamily:F}}>{msgs[msg]}</div>
-      <div style={{width:200,height:4,background:T.navyLight,borderRadius:50,overflow:'hidden'}}>
-        <div style={{height:'100%',background:`linear-gradient(90deg,${T.navy},${T.gold})`,borderRadius:50,animation:'load 1.5s ease-in-out infinite',width:'60%'}}/>
+    <div style={{minHeight:'100vh',background:T.cream,display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{maxWidth:480,width:'100%',padding:'40px 24px',textAlign:'center'}}>
+        <div style={{width:64,height:64,borderRadius:'50%',background:T.navyLight,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',fontSize:28}}>🎁</div>
+        <h2 style={{fontSize:22,fontWeight:900,color:T.navy,margin:'0 0 6px',fontFamily:F}}>Finding the perfect gift...</h2>
+        <p style={{color:T.gray,fontSize:14,margin:'0 0 28px',minHeight:20,fontFamily:F2}}>{s.label}</p>
+        <div style={{background:T.navyLight,borderRadius:50,height:10,overflow:'hidden',marginBottom:10}}>
+          <div style={{background:`linear-gradient(90deg,${T.navy},${T.gold})`,height:'100%',width:`${s.pct}%`,borderRadius:50,transition:'width .8s ease'}}/>
+        </div>
+        <p style={{fontSize:11,color:T.grayLight,marginBottom:28,fontFamily:F2}}>{s.pct}% complete</p>
+        {clue?.trim() && (
+          <Card style={{padding:'14px 18px',textAlign:'left',background:T.goldLight,border:'none',boxShadow:'none'}}>
+            <SLabel color={T.gold}>WORKING WITH YOUR CLUE</SLabel>
+            <p style={{margin:0,fontSize:13,color:T.gray,lineHeight:1.6,fontFamily:F2}}>"{clue.trim()}"</p>
+          </Card>
+        )}
       </div>
-      <style>{`@keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}`}</style>
+    </div>
+  )
+}
+
+// ── ERROR VIEW ────────────────────────────────────────────────────────────────
+function ErrorView({ msg, onRetry, onBack }) {
+  return (
+    <div style={{maxWidth:500,margin:'0 auto',padding:'60px 24px',textAlign:'center'}}>
+      <div style={{fontSize:48,marginBottom:14}}>😬</div>
+      <h2 style={{fontSize:20,fontWeight:900,color:T.navy,margin:'0 0 8px',fontFamily:F}}>Something went wrong</h2>
+      <p style={{fontSize:14,color:T.gray,margin:'0 0 24px',lineHeight:1.6,fontFamily:F2}}>{msg || 'The request timed out or hit an error. Usually fixes itself on retry.'}</p>
+      <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+        <Btn variant="gold" onClick={onRetry}>↺ Try again</Btn>
+        <Btn variant="gray" onClick={onBack}>← Edit answers</Btn>
+      </div>
     </div>
   )
 }
@@ -620,6 +670,13 @@ export default function App() {
   const [gift, setGift] = useState(null)
   const [answers, setAnswers] = useState(null)
   const [error, setError] = useState('')
+  const [loadStage, setLoadStage] = useState(0)
+  const timerRef = React.useRef(null)
+
+  const startLoadAnim = () => {
+    setLoadStage(0); let i = 0
+    timerRef.current = setInterval(() => { i++; if(i < LOAD_STAGES.length) setLoadStage(i); else clearInterval(timerRef.current) }, 1800)
+  }
 
   const buildPrompt = (a) => {
     const rel = RELATIONSHIPS.find(r=>r.v===a.relationship)?.l || a.relationship
@@ -636,6 +693,8 @@ export default function App() {
   const generate = async (a) => {
     setAnswers(a)
     setStage('loading')
+    setError('')
+    startLoadAnim()
     try {
       const res = await fetch('/api/gift', {
         method:'POST',
@@ -651,10 +710,12 @@ export default function App() {
       const text = data.content?.find(b=>b.type==='text')?.text || ''
       const clean = text.replace(/```json|```/g,'').trim()
       const parsed = JSON.parse(clean)
+      clearInterval(timerRef.current)
       setGift(parsed)
       setStage('result')
     } catch(e) {
-      setError('Something went wrong. Please try again.')
+      clearInterval(timerRef.current)
+      setError(e.message || 'Something went wrong. Please try again.')
       setStage('error')
     }
   }
@@ -666,16 +727,9 @@ export default function App() {
       <SiteHeader onHome={reset}/>
       {stage === 'home' && <HomePage onStart={()=>setStage('quiz')}/>}
       {stage === 'quiz' && <QuizView onComplete={generate}/>}
-      {stage === 'loading' && <LoadingView clue={answers?.clue}/>}
+      {stage === 'loading' && <LoadingView stage={loadStage} clue={answers?.clue}/>}
       {stage === 'result' && gift && <ResultView gift={gift} answers={answers} onNew={reset}/>}
-      {stage === 'error' && (
-        <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16,padding:20}}>
-          <div style={{fontSize:48}}>😕</div>
-          <div style={{fontSize:18,fontWeight:800,color:T.navy,fontFamily:F}}>Something went wrong</div>
-          <div style={{fontSize:14,color:T.gray,fontFamily:F2}}>{error}</div>
-          <Btn variant="gold" onClick={()=>setStage('quiz')}>Try again</Btn>
-        </div>
-      )}
+      {stage === 'error' && <ErrorView msg={error} onRetry={()=>generate(answers)} onBack={()=>setStage('quiz')}/>}
     </>
   )
 }
