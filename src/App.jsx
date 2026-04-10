@@ -119,7 +119,7 @@ function SiteFooter() {
       <div style={{maxWidth:1000,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:8}}>
         <div style={{fontSize:13,color:'rgba(255,255,255,.5)',fontFamily:F}}>🎁 whatgiftshouldibuy.com</div>
         <div style={{display:'flex',gap:14,flexWrap:'wrap'}}>
-          {[['Birthday','/birthday-gift-ideas'],['Christmas','/christmas-gift-ideas'],['For him','/gift-ideas-for-him'],['For her','/gift-ideas-for-her'],['Under $50','/gift-ideas-under-50'],['Browse all','/browse']].map(([l,h])=>(
+          {[['Birthday','/birthday-gift-ideas'],['Christmas','/christmas-gift-ideas'],['For boyfriend','/gift-ideas-for-boyfriend'],['For girlfriend','/gift-ideas-for-girlfriend'],['For him','/gift-ideas-for-him'],['For her','/gift-ideas-for-her'],['Under $50','/gift-ideas-under-50'],['Browse all','/browse']].map(([l,h])=>(
             <a key={l} href={h} style={{fontSize:12,color:'rgba(255,255,255,.4)',textDecoration:'none',fontFamily:F}}>{l}</a>
           ))}
         </div>
@@ -514,6 +514,11 @@ function ResultView({ gift, answers, onNew }) {
           <Btn style={{flex:1,background:T.gold,color:T.navyDark}} onClick={onNew}>🎁 Find another gift</Btn>
           <Btn variant="outline" href="/browse">Browse all ideas</Btn>
         </div>
+        <div style={{marginTop:16,display:'flex',flexWrap:'wrap',gap:8}}>
+          {[['💕 For boyfriend','/gift-ideas-for-boyfriend'],['💝 For girlfriend','/gift-ideas-for-girlfriend'],['💍 For husband','/gift-ideas-for-husband'],['👸 For wife','/gift-ideas-for-wife'],['🎂 Birthday','/birthday-gift-ideas'],['🎄 Christmas','/christmas-gift-ideas'],['👨 For dad','/gift-ideas-for-dad'],['👩 For mom','/gift-ideas-for-mom']].map(([l,h])=>(
+            <a key={l} href={h} style={{background:T.navyLight,color:T.navy,borderRadius:50,padding:'6px 12px',fontSize:11,fontWeight:700,fontFamily:F,textDecoration:'none'}}>{l}</a>
+          ))}
+        </div>
       </div>
       <SiteFooter/>
     </div>
@@ -630,16 +635,22 @@ function HomePage({ onStart }) {
         <div style={{maxWidth:1000,margin:'0 auto'}}>
           <h2 style={{fontSize:'clamp(20px,4vw,28px)',fontWeight:900,color:T.navy,margin:'0 0 6px',fontFamily:F}}>Browse by recipient</h2>
           <p style={{fontSize:13,color:T.gray,margin:'0 0 20px',fontFamily:F2}}>Curated starting points for common gift situations.</p>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:12}}>
             {[
               ['💑','Gifts for him','/gift-ideas-for-him'],
               ['👩','Gifts for her','/gift-ideas-for-her'],
+              ['💕','For boyfriend','/gift-ideas-for-boyfriend'],
+              ['💝','For girlfriend','/gift-ideas-for-girlfriend'],
+              ['💍','For husband','/gift-ideas-for-husband'],
+              ['👸','For wife','/gift-ideas-for-wife'],
               ['👨','Gifts for dad','/gift-ideas-for-dad'],
               ['👩‍👧','Gifts for mom','/gift-ideas-for-mom'],
               ['🎮','Gifts for teens','/gift-ideas-for-teens'],
-              ['💼','Gifts for colleagues','/gift-ideas-for-colleagues'],
-              ['👴','Gifts for grandparents','/gift-ideas-for-grandparents'],
-              ['📚','Gifts for book lovers','/gift-ideas-for-book-lovers'],
+              ['🧒','Gifts for kids','/gift-ideas-for-kids'],
+              ['💼','For colleagues','/gift-ideas-for-colleagues'],
+              ['👴','For grandparents','/gift-ideas-for-grandparents'],
+              ['📚','For book lovers','/gift-ideas-for-book-lovers'],
+              ['🍳','For foodies','/gift-ideas-for-foodies'],
             ].map(([e,l,h])=>(
               <a key={l} href={h} style={{background:T.white,border:`1.5px solid ${T.border}`,borderRadius:T.r,padding:'16px',textDecoration:'none',display:'block',transition:'all .15s'}}>
                 <div style={{fontSize:24,marginBottom:8}}>{e}</div>
