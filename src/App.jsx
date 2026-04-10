@@ -621,6 +621,8 @@ function HomePage({ onStart }) {
               ['🎅','Secret Santa','/secret-santa-gift-ideas'],
               ['🏠','Housewarming','/housewarming-gift-ideas'],
               ['🎓','Graduation','/graduation-gift-ideas'],
+              ['🌸','Mother\'s Day','/mothers-day-gift-ideas'],
+              ['👨','Father\'s Day','/fathers-day-gift-ideas'],
               ['🍎','Teacher gifts','/gift-ideas-for-teachers'],
               ['🐘','White Elephant','/white-elephant-gift-ideas'],
             ].map(([e,l,h])=>(
