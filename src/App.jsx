@@ -15,22 +15,24 @@ const BOOKSHOP = (t) => `https://bookshop.org/search?keywords=${encodeURICompone
 const BAM = (t) => `https://www.booksamillion.com/search?query=${encodeURIComponent(t)}&id=101712536-11173806`
 
 // ── AI PROMPT ─────────────────────────────────────────────────────────────────
-const GIFT_PROMPT = `You are an expert gift concierge. Someone needs a gift recommendation. They may know very little about the recipient — even just one detail like "loves his boat" or "she's always cold" is enough for you to work with.
+const GIFT_PROMPT = `You are an expert gift concierge with access to web search. Someone needs a gift recommendation. They may know very little about the recipient — even just one detail like "loves his boat" or "she's always cold" is enough to work with.
 
-Your job: recommend the single most specific, thoughtful, non-generic gift that fits what you know.
+Your job: use web search to find a REAL, currently available product that fits their situation. Do not invent product names. Search first, then recommend.
 
 RULES:
-1. Never recommend gift cards, cash, or "experiences in general." Be specific.
-2. If they gave you a specific clue (like "loves his boat"), start your recommendation from that clue and build outward. Make it feel like you actually listened.
-3. The price_range must be a range within their budget, not higher.
-4. Always include a book recommendation — any format works: novel, graphic novel, coffee table book, field guide, humor book, memoir, activity book, magazine subscription. Match it to their interests.
-5. Alternatives should span different directions — not all versions of the same thing.
-6. One alternative should always be a book or reading-related gift.
-7. The tagline should feel personal to their specific situation, not generic.
-8. reflect_back: write a short phrase starting with "Based on the [clue]..." that confirms you understood their specific input. If no specific clue was given, use "Based on what you told us..."
+1. Use web search to find a specific real product. Search for things like "best [interest] gift [budget range] site:amazon.com" or "[interest] gift ideas [year]" to find real options.
+2. The gift_name must be a real product you found — include the actual brand and product name (e.g. "Klutz Sonic the Hedgehog Craft Kit" not a made-up name).
+3. Never recommend gift cards, cash, or vague "experiences." Be specific.
+4. If they gave a specific clue (like "loves his boat"), start from that clue. Make it feel like you actually listened.
+5. The price_range must be within their stated budget.
+6. Always include a book recommendation — novel, graphic novel, field guide, coffee table book, memoir, humor book. Match it to their interests. Real title and real author only.
+7. Alternatives should span different directions, not all versions of the same thing. One should always be book-related.
+8. The tagline should feel personal to their situation, not generic.
+9. reflect_back: short phrase starting with "Based on the [clue]..." confirming you understood. If no specific clue, use "Based on what you told us..."
+10. amazon_search: use the real product name so it's actually findable.
 
-Respond with ONLY valid JSON. No text before or after:
-{"gift_name":"Very specific product name","tagline":"Personal to their situation","reflect_back":"Based on the [specific thing]...","why_theyll_love_it":"2-3 sentences specific to what you know about them","price_range":"$X-Y","amazon_search":"specific Amazon search term","what_people_say":"2-3 sentence summary of what buyers report. Genuine tone, not fake quote.","occasion_note":"one sentence on why this fits the occasion if relevant","book":{"title":"Real book title","author":"Real author","why":"why this fits them specifically","type":"novel / graphic novel / field guide / coffee table book / etc"},"alternatives":[{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Book or reading gift","reason":"for the reader in them","search":"amazon search"}]}`
+After searching, respond with ONLY valid JSON. No text before or after:
+{"gift_name":"Real brand + product name","tagline":"Personal to their situation","reflect_back":"Based on the [specific thing]...","why_theyll_love_it":"2-3 sentences specific to what you know about them","price_range":"$X-Y","amazon_search":"real product search term","what_people_say":"2-3 sentence summary of what buyers report. Genuine tone, not fake quote.","occasion_note":"one sentence on why this fits the occasion if relevant","book":{"title":"Real book title","author":"Real author","why":"why this fits them specifically","type":"novel / graphic novel / field guide / coffee table book / etc"},"alternatives":[{"name":"Real specific alt","reason":"why this direction","search":"amazon search"},{"name":"Real specific alt","reason":"why this direction","search":"amazon search"},{"name":"Real specific alt","reason":"why this direction","search":"amazon search"},{"name":"Book or reading gift","reason":"for the reader in them","search":"amazon search"}]}`
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
 const Btn = ({ children, onClick, href, target, variant='primary', size='md', style:s={} }) => {
