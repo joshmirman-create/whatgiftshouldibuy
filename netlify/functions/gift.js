@@ -2,13 +2,6 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' }
   try {
     const body = JSON.parse(event.body)
-
-    // Inject web search so Claude finds real, buyable products
-    const bodyWithSearch = {
-      ...body,
-      tools: [{ type: 'web_search_20250305', name: 'web_search' }]
-    }
-
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -16,10 +9,10 @@ exports.handler = async (event) => {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify(bodyWithSearch)
+      body: JSON.stringify(body)
     })
     const data = await res.json()
-    return { statusCode: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(data) }
+    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
   } catch (e) {
     return { statusCode: 500, body: JSON.stringify({ error: e.message }) }
   }

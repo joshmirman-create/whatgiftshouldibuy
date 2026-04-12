@@ -15,24 +15,22 @@ const BOOKSHOP = (t) => `https://bookshop.org/search?keywords=${encodeURICompone
 const BAM = (t) => `https://www.booksamillion.com/search?query=${encodeURIComponent(t)}&id=101712536-11173806`
 
 // ── AI PROMPT ─────────────────────────────────────────────────────────────────
-const GIFT_PROMPT = `You are an expert gift concierge with access to web search. Someone needs a gift recommendation. They may know very little about the recipient — even just one detail like "loves his boat" or "she's always cold" is enough to work with.
+const GIFT_PROMPT = `You are an expert gift concierge. Someone needs a gift recommendation. They may know very little about the recipient — even just one detail like "loves his boat" or "she's always cold" is enough for you to work with.
 
-Your job: use web search to find a REAL, currently available product that fits their situation. Do not invent product names. Search first, then recommend.
+Your job: recommend the single most specific, thoughtful, non-generic gift that fits what you know.
 
 RULES:
-1. Use web search to find a specific real product. Search for things like "best [interest] gift [budget range] site:amazon.com" or "[interest] gift ideas [year]" to find real options.
-2. The gift_name must be a real product you found — include the actual brand and product name (e.g. "Klutz Sonic the Hedgehog Craft Kit" not a made-up name).
-3. Never recommend gift cards, cash, or vague "experiences." Be specific.
-4. If they gave a specific clue (like "loves his boat"), start from that clue. Make it feel like you actually listened.
-5. The price_range must be within their stated budget.
-6. Always include a book recommendation — novel, graphic novel, field guide, coffee table book, memoir, humor book. Match it to their interests. Real title and real author only.
-7. Alternatives should span different directions, not all versions of the same thing. One should always be book-related.
-8. The tagline should feel personal to their situation, not generic.
-9. reflect_back: short phrase starting with "Based on the [clue]..." confirming you understood. If no specific clue, use "Based on what you told us..."
-10. amazon_search: use the real product name so it's actually findable.
+1. Never recommend gift cards, cash, or "experiences in general." Be specific.
+2. If they gave you a specific clue (like "loves his boat"), start your recommendation from that clue and build outward. Make it feel like you actually listened.
+3. The price_range must be a range within their budget, not higher.
+4. Always include a book recommendation — any format works: novel, graphic novel, coffee table book, field guide, humor book, memoir, activity book, magazine subscription. Match it to their interests.
+5. Alternatives should span different directions — not all versions of the same thing.
+6. One alternative should always be a book or reading-related gift.
+7. The tagline should feel personal to their specific situation, not generic.
+8. reflect_back: write a short phrase starting with "Based on the [clue]..." that confirms you understood their specific input. If no specific clue was given, use "Based on what you told us..."
 
-After searching, respond with ONLY valid JSON. No text before or after:
-{"gift_name":"Real brand + product name","tagline":"Personal to their situation","reflect_back":"Based on the [specific thing]...","why_theyll_love_it":"2-3 sentences specific to what you know about them","price_range":"$X-Y","amazon_search":"real product search term","what_people_say":"2-3 sentence summary of what buyers report. Genuine tone, not fake quote.","occasion_note":"one sentence on why this fits the occasion if relevant","book":{"title":"Real book title","author":"Real author","why":"why this fits them specifically","type":"novel / graphic novel / field guide / coffee table book / etc"},"alternatives":[{"name":"Real specific alt","reason":"why this direction","search":"amazon search"},{"name":"Real specific alt","reason":"why this direction","search":"amazon search"},{"name":"Real specific alt","reason":"why this direction","search":"amazon search"},{"name":"Book or reading gift","reason":"for the reader in them","search":"amazon search"}]}`
+Respond with ONLY valid JSON. No text before or after:
+{"gift_name":"Very specific product name","tagline":"Personal to their situation","reflect_back":"Based on the [specific thing]...","why_theyll_love_it":"2-3 sentences specific to what you know about them","price_range":"$X-Y","amazon_search":"specific Amazon search term","what_people_say":"2-3 sentence summary of what buyers report. Genuine tone, not fake quote.","occasion_note":"one sentence on why this fits the occasion if relevant","book":{"title":"Real book title","author":"Real author","why":"why this fits them specifically","type":"novel / graphic novel / field guide / coffee table book / etc"},"alternatives":[{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Book or reading gift","reason":"for the reader in them","search":"amazon search"}]}`
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
 const Btn = ({ children, onClick, href, target, variant='primary', size='md', style:s={} }) => {
@@ -88,20 +86,19 @@ function SiteHeader({ onHome }) {
         <style>{`
           .gNav{display:none}
           @media(min-width:600px){.gNav{display:block}}
-          @media(max-width:480px){.gLogoFull{display:none !important}.gLogoShort{display:inline !important}}
-          .gLogoShort{display:none}
           .gBottomNav button,.gBottomNav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;padding:8px 4px;text-decoration:none;line-height:1.2;color:#718096}
           @media(max-width:599px){body{padding-bottom:68px}}
+          @media(max-width:599px){.gHeader{flex-direction:column;align-items:flex-start;height:auto;padding:10px 16px;gap:6px}}
+          @media(max-width:599px){.gHeaderNav{width:100%;justify-content:flex-start}}
         `}</style>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'0 16px',display:'flex',alignItems:'center',justifyContent:'space-between',height:52}}>
+        <div className="gHeader" style={{maxWidth:1200,margin:'0 auto',padding:'0 16px',display:'flex',alignItems:'center',justifyContent:'space-between',height:52}}>
           <button onClick={onHome} style={{background:'none',border:'none',cursor:'pointer',display:'flex',alignItems:'center',gap:7,flexShrink:0}}>
             <span style={{fontSize:18}}>🎁</span>
-            <span className="gLogoFull" style={{fontSize:13,fontWeight:900,color:T.navy,fontFamily:F,whiteSpace:'nowrap'}}>
+            <span style={{fontSize:13,fontWeight:900,color:T.navy,fontFamily:F,whiteSpace:'nowrap'}}>
               <span style={{color:T.gold}}>what gift</span> should i buy?
             </span>
-            <span className="gLogoShort" style={{fontSize:13,fontWeight:900,color:T.navy,fontFamily:F,whiteSpace:'nowrap'}}>gift?</span>
           </button>
-          <nav style={{display:'flex',gap:2,alignItems:'center',flexShrink:0}}>
+          <nav className="gHeaderNav" style={{display:'flex',gap:2,alignItems:'center',flexShrink:0}}>
             <a href="/browse" className="gNav" style={{background:'none',border:'none',padding:'6px 10px',fontSize:13,fontWeight:700,color:T.gray,fontFamily:F,whiteSpace:'nowrap',textDecoration:'none'}}>Browse</a>
             <Btn size="sm" variant="gold" onClick={onHome} style={{marginLeft:6,whiteSpace:'nowrap'}}>🎁 Find a gift</Btn>
           </nav>
@@ -291,28 +288,31 @@ function QuizView({ onComplete }) {
           {step === 2 && (
             <>
               <h2 style={{fontSize:'clamp(22px,5vw,30px)', fontWeight:900, color:T.navy, margin:'0 0 8px', fontFamily:F, lineHeight:1.2}}>What do you know about them?</h2>
-              <p style={{fontSize:14, color:T.gray, margin:'0 0 16px', fontFamily:F2}}>Tap whatever fits, or just type the one thing you know. Even something random like "loves his boat" is plenty.</p>
-              <div style={{display:'flex', gap:8, flexWrap:'wrap', marginBottom:16}}>
-                {INTERESTS.map(i => (
-                  <button key={i.v} onClick={()=>toggleInterest(i.v)} style={chipStyle(answers.interests.includes(i.v))}>
-                    <span>{i.e}</span>{i.l}
-                  </button>
-                ))}
-              </div>
-              {answers.interests.length > 0 && <p style={{fontSize:11, color:T.grayLight, margin:'-8px 0 14px', fontFamily:F}}>{answers.interests.length}/3 selected</p>}
-              <div style={{borderTop:`1px solid ${T.border}`, paddingTop:16}}>
+              <p style={{fontSize:14, color:T.gray, margin:'0 0 16px', fontFamily:F2}}>Type the one thing you know, or tap what fits below. Either works.</p>
+              <div style={{marginBottom:20}}>
                 <label style={{fontSize:13, fontWeight:700, color:T.navy, display:'block', marginBottom:8, fontFamily:F}}>
-                  Anything specific? <span style={{fontWeight:400, color:T.grayLight}}>(totally optional)</span>
+                  The one thing you know <span style={{fontWeight:400, color:T.grayLight}}>(totally optional)</span>
                 </label>
                 <textarea
                   value={answers.clue}
                   onChange={e=>setAnswers(a=>({...a,clue:e.target.value}))}
-                  placeholder={"He loves his boat · She\'s always cold · Just got into sourdough · Huge Taylor Swift fan"}
+                  placeholder={"He loves his boat · She's always cold · Just got into sourdough · Huge Taylor Swift fan"}
                   style={{width:'100%', border:`2px solid ${T.border}`, borderRadius:12, padding:'12px 14px', fontSize:13, fontFamily:F2, resize:'vertical', minHeight:72, color:T.charcoal, background:T.white, outline:'none', boxSizing:'border-box', lineHeight:1.6}}
                   onFocus={e=>e.target.style.borderColor=T.gold}
                   onBlur={e=>e.target.style.borderColor=T.border}
                 />
               </div>
+              <div style={{borderTop:`1px solid ${T.border}`, paddingTop:16, marginBottom:8}}>
+                <label style={{fontSize:12, fontWeight:700, color:T.grayLight, display:'block', marginBottom:10, fontFamily:F, textTransform:'uppercase', letterSpacing:'0.5px'}}>Or tap what fits</label>
+                <div style={{display:'flex', gap:8, flexWrap:'wrap'}}>
+                  {INTERESTS.map(i => (
+                    <button key={i.v} onClick={()=>toggleInterest(i.v)} style={chipStyle(answers.interests.includes(i.v))}>
+                      <span>{i.e}</span>{i.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {answers.interests.length > 0 && <p style={{fontSize:11, color:T.grayLight, margin:'8px 0 0', fontFamily:F}}>{answers.interests.length}/3 selected</p>}
             </>
           )}
 
@@ -415,7 +415,8 @@ function ResultView({ gift, answers, onNew }) {
   const [copied, setCopied] = useState(false)
   const recipientLabel = RELATIONSHIPS.find(r=>r.v===answers.relationship)?.l || 'them'
   const occasionLabel = OCCASIONS.find(o=>o.v===answers.occasion)?.l || ''
-  const shareText = `🎁 Gift idea for ${recipientLabel}${occasionLabel?' ('+occasionLabel+')':''}:\n\n${gift.gift_name} (${gift.price_range})\n${gift.tagline}\n\nFind more ideas: ${window.location.origin}`
+  const shareUrl = window.location.href
+  const shareText = `🎁 Gift idea for ${recipientLabel}${occasionLabel?' ('+occasionLabel+')':''}:\n\n${gift.gift_name} (${gift.price_range})\n${gift.tagline}\n\nSee the full result + more ideas: ${shareUrl}`
   const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
   const smsUrl = `sms:?body=${encodeURIComponent(shareText)}`
   const copyIt = () => { navigator.clipboard.writeText(shareText).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000) }) }
@@ -688,6 +689,23 @@ export default function App() {
   const [loadStage, setLoadStage] = useState(0)
   const timerRef = React.useRef(null)
 
+  React.useEffect(() => {
+    if (window.location.hash.startsWith('#result?')) {
+      const params = new URLSearchParams(window.location.hash.slice(8))
+      const a = {
+        relationship: params.get('rel') || '',
+        age: params.get('age') || '',
+        interests: (params.get('interests') || '').split(',').filter(Boolean),
+        clue: params.get('clue') || '',
+        budget: params.get('budget') || '',
+        occasion: params.get('occasion') || '',
+      }
+      if (a.relationship && a.budget) {
+        setTimeout(() => generate(a), 100)
+      }
+    }
+  }, [])
+
   const startLoadAnim = () => {
     setLoadStage(0); let i = 0
     timerRef.current = setInterval(() => { i++; if(i < LOAD_STAGES.length) setLoadStage(i); else clearInterval(timerRef.current) }, 1800)
@@ -728,6 +746,13 @@ export default function App() {
       clearInterval(timerRef.current)
       setGift(parsed)
       setStage('result')
+      // Push shareable URL
+      const p = new URLSearchParams({
+        rel: a.relationship, age: a.age, budget: a.budget, occasion: a.occasion,
+        ...(a.interests?.length ? {interests: a.interests.join(',')} : {}),
+        ...(a.clue?.trim() ? {clue: a.clue.trim()} : {})
+      })
+      if (history.pushState) history.pushState(null, '', `#result?${p.toString()}`)
     } catch(e) {
       clearInterval(timerRef.current)
       setError(e.message || 'Something went wrong. Please try again.')
@@ -735,7 +760,7 @@ export default function App() {
     }
   }
 
-  const reset = () => { setStage('home'); setGift(null); setAnswers(null); setError('') }
+  const reset = () => { setStage('home'); setGift(null); setAnswers(null); setError(''); if(history.pushState) history.pushState(null,'',location.pathname) }
 
   return (
     <>
