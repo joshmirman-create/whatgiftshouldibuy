@@ -423,20 +423,21 @@ function ResultView({ gift, answers, onNew }) {
 
   return (
     <div style={{minHeight:'100vh',background:T.cream}}>
-      <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.fu{animation:fadeUp .4s ease forwards}`}</style>
+      <style>{"@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.fu{animation:fadeUp .4s ease forwards}"}</style>
 
       {/* Hero */}
       <div style={{background:`linear-gradient(135deg,${T.navyDark},${T.navy})`,padding:'36px 20px 32px',textAlign:'center',borderBottom:`3px solid ${T.gold}`}}>
         <div style={{maxWidth:640,margin:'0 auto'}}>
           {gift.reflect_back && (
-            <div style={{display:'inline-flex',alignItems:'center',gap:6,background:'rgba(201,168,76,.15)',border:'1px solid rgba(201,168,76,.4)',borderRadius:50,padding:'5px 14px',marginBottom:14}}>
-              <span style={{fontSize:12,fontWeight:700,color:T.goldBright,fontFamily:F}}>✓ {gift.reflect_back}</span>
+            <div style={{background:'rgba(201,168,76,.15)',border:'1px solid rgba(201,168,76,.35)',borderRadius:12,padding:'12px 18px',marginBottom:20,textAlign:'left'}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.gold,letterSpacing:1.2,marginBottom:4,fontFamily:F}}>WE HEARD YOU</div>
+              <p style={{margin:0,fontSize:15,fontWeight:700,color:'#fff',fontFamily:F,lineHeight:1.4}}>✓ {gift.reflect_back}</p>
             </div>
           )}
-          <h1 style={{fontSize:'clamp(20px,5vw,34px)',fontWeight:900,color:'#fff',margin:'0 0 10px',lineHeight:1.2,fontFamily:F}}>{gift.gift_name}</h1>
+          <h1 style={{fontSize:'clamp(22px,5vw,36px)',fontWeight:900,color:'#fff',margin:'0 0 10px',lineHeight:1.2,fontFamily:F}}>{gift.gift_name}</h1>
           <p style={{color:'rgba(255,255,255,.85)',fontSize:15,margin:'0 0 14px',lineHeight:1.5,fontFamily:F2}}>{gift.tagline}</p>
           <div style={{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
-            <Pill bg='rgba(255,255,255,.12)' color='#fff'>{gift.price_range}</Pill>
+            <Pill bg='rgba(255,255,255,.15)' color='#fff'>{gift.price_range}</Pill>
             {occasionLabel && <Pill bg='rgba(201,168,76,.2)' color={T.goldBright}>{occasionLabel}</Pill>}
           </div>
         </div>
@@ -455,7 +456,7 @@ function ResultView({ gift, answers, onNew }) {
               <p style={{margin:0,fontSize:13,color:T.navy,lineHeight:1.6,fontFamily:F2}}>{gift.what_people_say}</p>
             </div>
           )}
-          <Btn href={AMZN(gift.amazon_search)} target="_blank" style={{background:'#FF9900',color:T.navyDark,display:'block',textAlign:'center',borderRadius:10}}>Find on Amazon →</Btn>
+          <Btn href={AMZN(gift.amazon_search)} target="_blank" style={{background:'#FF9900',color:T.navyDark,display:'block',textAlign:'center',borderRadius:10,fontSize:15,padding:'13px 22px'}}>🛒 Find on Amazon →</Btn>
         </Card>
 
         {/* Book recommendation */}
@@ -484,17 +485,20 @@ function ResultView({ gift, answers, onNew }) {
           </Card>
         )}
 
-        {/* Alternatives */}
+        {/* Alternatives - visual card grid */}
         {gift.alternatives?.length > 0 && (
           <Card style={{padding:'18px 20px',marginBottom:14}}>
             <SLabel color={T.navy}>MORE IDEAS</SLabel>
-            <div style={{display:'grid',gap:10}}>
+            <p style={{margin:'0 0 14px',fontSize:12,color:T.gray,fontFamily:F2}}>Not quite right? These go in a different direction.</p>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:10}}>
               {gift.alternatives.map((alt,i) => (
-                <div key={i} style={{background:T.navyLight,borderRadius:T.rSm,padding:'12px 14px'}}>
-                  <div style={{fontSize:13,fontWeight:800,color:T.navy,marginBottom:3,fontFamily:F,lineHeight:1.3}}>{alt.name}</div>
+                <a key={i} href={AMZN(alt.search)} target="_blank" rel="noopener"
+                  style={{background:T.navyLight,borderRadius:12,padding:'14px',textDecoration:'none',display:'block',border:`1.5px solid ${T.border}`,transition:'all .15s'}}>
+                  <div style={{fontSize:22,marginBottom:8}}>🎁</div>
+                  <div style={{fontSize:13,fontWeight:800,color:T.navy,marginBottom:4,fontFamily:F,lineHeight:1.3}}>{alt.name}</div>
                   <div style={{fontSize:11,color:T.gray,lineHeight:1.4,marginBottom:8,fontFamily:F2}}>{alt.reason}</div>
-                  <Btn size="sm" href={AMZN(alt.search)} target="_blank" style={{background:T.navy,fontSize:11}}>See on Amazon</Btn>
-                </div>
+                  <div style={{fontSize:11,fontWeight:700,color:T.gold,fontFamily:F}}>See on Amazon →</div>
+                </a>
               ))}
             </div>
           </Card>
