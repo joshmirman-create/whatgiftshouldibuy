@@ -413,6 +413,23 @@ function ErrorView({ msg, onRetry, onBack }) {
 // ── RESULT VIEW ────────────────────────────────────────────────────────────────
 function ResultView({ gift, answers, onNew }) {
   const [copied, setCopied] = useState(false)
+  const [productImage, setProductImage] = useState(null)
+  const [productUrl, setProductUrl] = useState(null)
+
+  React.useEffect(() => {
+    if (!gift?.amazon_search) return
+    fetch('/api/amazon-image', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ keywords: gift.amazon_search })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.image_url) setProductImage(d.image_url)
+      if (d.product_url) setProductUrl(d.product_url)
+    })
+    .catch(() => {}) // silent fail, falls back to no image
+  }, [gift?.amazon_search])
   const recipientLabel = RELATIONSHIPS.find(r=>r.v===answers.relationship)?.l || 'them'
   const occasionLabel = OCCASIONS.find(o=>o.v===answers.occasion)?.l || ''
   const shareUrl = window.location.href
@@ -447,6 +464,15 @@ function ResultView({ gift, answers, onNew }) {
 
         {/* Main gift card */}
         <Card style={{padding:'22px',marginBottom:14}}>
+          {productImage && (
+            <div style={{textAlign:'center',marginBottom:16}}>
+              <img
+                src={productImage}
+                alt={gift.gift_name}
+                style={{maxWidth:200,maxHeight:200,objectFit:'contain',borderRadius:10,boxShadow:'0 2px 12px rgba(0,0,0,.12)'}}
+              />
+            </div>
+          )}
           <SLabel color={T.navy}>WHY THEY'LL LOVE IT</SLabel>
           <p style={{margin:'0 0 12px',fontSize:14,color:T.charcoal,lineHeight:1.7,fontFamily:F2}}>{gift.why_theyll_love_it}</p>
           {gift.occasion_note && <p style={{margin:'0 0 12px',fontSize:12,color:T.grayLight,fontStyle:'italic',fontFamily:F2}}>{gift.occasion_note}</p>}
@@ -456,7 +482,7 @@ function ResultView({ gift, answers, onNew }) {
               <p style={{margin:0,fontSize:13,color:T.navy,lineHeight:1.6,fontFamily:F2}}>{gift.what_people_say}</p>
             </div>
           )}
-          <Btn href={AMZN(gift.amazon_search)} target="_blank" style={{background:'#FF9900',color:T.navyDark,display:'block',textAlign:'center',borderRadius:10,fontSize:15,padding:'13px 22px'}}>🛒 Find on Amazon →</Btn>
+          <Btn href={productUrl || AMZN(gift.amazon_search)} target="_blank" style={{background:'#FF9900',color:T.navyDark,display:'block',textAlign:'center',borderRadius:10,fontSize:15,padding:'13px 22px'}}>🛒 Find on Amazon →</Btn>
         </Card>
 
         {/* Book recommendation */}
