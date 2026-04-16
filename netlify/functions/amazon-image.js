@@ -1,114 +1,24 @@
 // Netlify function: /api/amazon-image
-// Fetches product image from Amazon PA API v5 using search keywords
-// Returns: { image_url, title, price, asin, product_url }
+// Direct implementation using official Amazon Creators API v3 auth
+// Scope: creatorsapi::default, LWA JSON body, version 3.1
 
-const REGION = 'us-east-1'
-const HOST = 'webservices.amazon.com'
-const PATH = '/paapi5/searchitems'
+const https = require('https')
 
-// AWS Signature V4 signing
-const crypto = require('crypto')
-
-function sign(key, msg) {
-  return crypto.createHmac('sha256', key).update(msg, 'utf8').digest()
-}
-
-function getSignatureKey(key, dateStamp, regionName, serviceName) {
-  const kDate = sign('AWS4' + key, dateStamp)
-  const kRegion = sign(kDate, regionName)
-  const kService = sign(kRegion, serviceName)
-  const kSigning = sign(kService, 'aws4_request')
-  return kSigning
-}
-
-function toHex(buffer) {
-  return buffer.toString('hex')
-}
-
-async function searchAmazon(keywords, partnerTag, clientId, clientSecret) {
-  const now = new Date()
-  const amzDate = now.toISOString().replace(/[:\-]|\.\d{3}/g, '').slice(0, 15) + 'Z'
-  const dateStamp = amzDate.slice(0, 8)
-
-  const payload = JSON.stringify({
-    Keywords: keywords,
-    PartnerTag: partnerTag,
-    PartnerType: 'Associates',
-    Marketplace: 'www.amazon.com',
-    Resources: [
-      'Images.Primary.Large',
-      'Images.Primary.Medium',
-      'ItemInfo.Title',
-      'Offers.Listings.Price',
-    ],
-    ItemCount: 1,
+function httpsPost(hostname, path, headers, body) {
+  return new Promise((resolve, reject) => {
+    const data = typeof body === 'string' ? body : JSON.stringify(body)
+    const req = https.request({ hostname, path, method: 'POST', headers }, (res) => {
+      let raw = ''
+      res.on('data', chunk => raw += chunk)
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, body: JSON.parse(raw) }) }
+        catch(e) { resolve({ status: res.statusCode, body: raw }) }
+      })
+    })
+    req.on('error', reject)
+    req.write(data)
+    req.end()
   })
-
-  const payloadHash = crypto.createHash('sha256').update(payload, 'utf8').digest('hex')
-
-  const canonicalHeaders =
-    `content-encoding:amz-1.0\n` +
-    `content-type:application/json; charset=utf-8\n` +
-    `host:${HOST}\n` +
-    `x-amz-date:${amzDate}\n` +
-    `x-amz-target:com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems\n`
-
-  const signedHeaders = 'content-encoding;content-type;host;x-amz-date;x-amz-target'
-
-  const canonicalRequest = [
-    'POST',
-    PATH,
-    '',
-    canonicalHeaders,
-    signedHeaders,
-    payloadHash,
-  ].join('\n')
-
-  const credentialScope = `${dateStamp}/${REGION}/ProductAdvertisingAPI/aws4_request`
-  const stringToSign = [
-    'AWS4-HMAC-SHA256',
-    amzDate,
-    credentialScope,
-    crypto.createHash('sha256').update(canonicalRequest, 'utf8').digest('hex'),
-  ].join('\n')
-
-  const signingKey = getSignatureKey(clientSecret, dateStamp, REGION, 'ProductAdvertisingAPI')
-  const signature = toHex(crypto.createHmac('sha256', signingKey).update(stringToSign, 'utf8').digest())
-
-  const authHeader = `AWS4-HMAC-SHA256 Credential=${clientId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`
-
-  const response = await fetch(`https://${HOST}${PATH}`, {
-    method: 'POST',
-    headers: {
-      'content-encoding': 'amz-1.0',
-      'content-type': 'application/json; charset=utf-8',
-      host: HOST,
-      'x-amz-date': amzDate,
-      'x-amz-target': 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems',
-      Authorization: authHeader,
-    },
-    body: payload,
-  })
-
-  const data = await response.json()
-
-  if (!response.ok || !data.SearchResult?.Items?.length) {
-    return null
-  }
-
-  const item = data.SearchResult.Items[0]
-  const imageUrl =
-    item.Images?.Primary?.Large?.URL ||
-    item.Images?.Primary?.Medium?.URL ||
-    null
-  const title = item.ItemInfo?.Title?.DisplayValue || null
-  const price = item.Offers?.Listings?.[0]?.Price?.DisplayAmount || null
-  const asin = item.ASIN || null
-  const productUrl = asin
-    ? `https://www.amazon.com/dp/${asin}?tag=${partnerTag}`
-    : null
-
-  return { image_url: imageUrl, title, price, asin, product_url: productUrl }
 }
 
 exports.handler = async (event) => {
@@ -133,17 +43,67 @@ exports.handler = async (event) => {
       return { statusCode: 500, body: JSON.stringify({ error: 'Amazon credentials not configured' }) }
     }
 
-    const result = await searchAmazon(keywords, partnerTag, clientId, clientSecret)
+    // Step 1: Get LWA token — v3.1 uses JSON body with scope creatorsapi::default
+    const tokenRes = await httpsPost(
+      'api.amazon.com',
+      '/auth/o2/token',
+      { 'Content-Type': 'application/json' },
+      {
+        grant_type: 'client_credentials',
+        client_id: clientId,
+        client_secret: clientSecret,
+        scope: 'creatorsapi::default'
+      }
+    )
 
-    if (!result) {
-      return { statusCode: 404, body: JSON.stringify({ error: 'No results found' }) }
+    if (!tokenRes.body.access_token) {
+      return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'Token failed', detail: tokenRes.body }) }
     }
+
+    const token = tokenRes.body.access_token
+
+    // Step 2: Call Creators API SearchItems
+    const payload = {
+      partnerTag: partnerTag,
+      partnerType: 'Associates',
+      keywords: keywords,
+      searchIndex: 'All',
+      itemCount: 1,
+      resources: [
+        'images.primary.large',
+        'images.primary.medium',
+        'itemInfo.title',
+        'offersV2.listings.price',
+      ]
+    }
+
+    const searchRes = await httpsPost(
+      'creatorsapi.amazon',
+      '/paapi5/searchitems',
+      {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      payload
+    )
+
+    if (searchRes.status !== 200 || !searchRes.body.searchResult?.items?.length) {
+      return { statusCode: 404, headers: cors, body: JSON.stringify({ error: 'No results', detail: searchRes.body }) }
+    }
+
+    const item = searchRes.body.searchResult.items[0]
+    const imageUrl = item.images?.primary?.large?.url || item.images?.primary?.medium?.url || null
+    const title = item.itemInfo?.title?.displayValue || null
+    const price = item.offersV2?.listings?.[0]?.price?.displayAmount || null
+    const asin = item.asin || null
+    const productUrl = asin ? `https://www.amazon.com/dp/${asin}?tag=${partnerTag}` : null
 
     return {
       statusCode: 200,
       headers: cors,
-      body: JSON.stringify(result),
+      body: JSON.stringify({ image_url: imageUrl, title, price, asin, product_url: productUrl }),
     }
+
   } catch (e) {
     return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e.message }) }
   }
