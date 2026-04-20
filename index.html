@@ -21,8 +21,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-  <div id="root">
-    <style>
+  <!-- Pre-rendered content: visible to crawlers AND users before React loads -->
+<div id="static-site">
+<style>
       .gi-header{background:#fff;border-bottom:1.5px solid #E2E4E9;padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(27,43,75,.07)}
       .gi-logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:14px;color:#1B2B4B;text-decoration:none;display:flex;align-items:center;gap:7px}
       .gi-logo span.g{color:#C9A84C}
@@ -150,7 +151,21 @@
     </div>
 
     <footer class="gi-footer">© Zen Monkey Studios · whatgiftshouldibuy.com &nbsp;·&nbsp; Amazon affiliate · No sponsored results</footer>
-  </div>
-  <script type="module" src="/src/main.jsx"></script>
+</div>
+<!-- React app mounts here -->
+<div id="root"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var observer = new MutationObserver(function(mutations) {
+      if (document.getElementById('root').children.length > 0) {
+        var staticEl = document.getElementById('static-site');
+        if (staticEl) staticEl.style.display = 'none';
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.getElementById('root'), {childList: true});
+  });
+</script>
+<script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
