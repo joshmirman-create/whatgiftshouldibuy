@@ -10,6 +10,63 @@ const T = {
 }
 const F = "'Montserrat','Trebuchet MS',system-ui,sans-serif"
 const F2 = "'DM Sans','Trebuchet MS',system-ui,sans-serif"
+
+// Gift illustration library — maps AI category to local image
+// Add new images to /public/images/gifts/ as they are created
+const GIFT_IMAGES = {
+  'lego-building': '/images/gifts/lego-building.png',
+  'art-supplies': '/images/gifts/art-supplies.png',
+  'science-stem': '/images/gifts/science-stem.png',
+  'outdoor-sports': '/images/gifts/outdoor-sports.png',
+  'books-reading': '/images/gifts/books-reading.png',
+  'board-games-puzzles': '/images/gifts/board-games-puzzles.png',
+  'music-instruments': '/images/gifts/music-instruments.png',
+  'pretend-play-dolls': '/images/gifts/pretend-play-dolls.png',
+  'tech-gadgets': '/images/gifts/tech-gadgets.png',
+  'collectibles-figures': '/images/gifts/collectibles-figures.png',
+  'fashion-accessories': '/images/gifts/fashion-accessories.png',
+  'cooking-baking': '/images/gifts/cooking-baking.png',
+  'animals-nature': '/images/gifts/animals-nature.png',
+  'creative-writing-journal': '/images/gifts/creative-writing-journal.png',
+  'retro-vintage-gaming': '/images/gifts/retro-vintage-gaming.png',
+  'sports-equipment': '/images/gifts/sports-equipment.png',
+  'bath-spa-wellness': '/images/gifts/bath-spa-wellness.png',
+  'garden-plants': '/images/gifts/garden-plants.png',
+  'pets-animals': '/images/gifts/pets-animals.png',
+  'travel-adventure': '/images/gifts/travel-adventure.png',
+  'cars-vehicles': '/images/gifts/cars-vehicles.png',
+  'space-astronomy': '/images/gifts/space-astronomy.png',
+  'dinosaurs-fossils': '/images/gifts/dinosaurs-fossils.png',
+  'superheroes-comics': '/images/gifts/superheroes-comics.png',
+  'princess-fairy': '/images/gifts/princess-fairy.png',
+  'construction-tools': '/images/gifts/construction-tools.png',
+  'dance-performance': '/images/gifts/dance-performance.png',
+  'yoga-mindfulness': '/images/gifts/yoga-mindfulness.png',
+  'photography-art': '/images/gifts/photography-art.png',
+  'magic-tricks': '/images/gifts/magic-tricks.png',
+  'coding-robotics': '/images/gifts/coding-robotics.png',
+  'slime-sensory': '/images/gifts/slime-sensory.png',
+  'candles-home': '/images/gifts/candles-home.png',
+  'jewelry-making': '/images/gifts/jewelry-making.png',
+  'fitness-exercise': '/images/gifts/fitness-exercise.png',
+  'camping-outdoors': '/images/gifts/camping-outdoors.png',
+  'ocean-beach': '/images/gifts/ocean-beach.png',
+  'theater-drama': '/images/gifts/theater-drama.png',
+  'mystery-detective': '/images/gifts/mystery-detective.png',
+  'fantasy-dragons': '/images/gifts/fantasy-dragons.png',
+  'history-culture': '/images/gifts/history-culture.png',
+  'math-logic': '/images/gifts/math-logic.png',
+  'languages-culture': '/images/gifts/languages-culture.png',
+  'charity-giving': '/images/gifts/charity-giving.png',
+  'experience-tickets': '/images/gifts/experience-tickets.png',
+  'subscription-box': '/images/gifts/subscription-box.png',
+  'handmade-craft': '/images/gifts/handmade-craft.png',
+  'food-snacks': '/images/gifts/food-snacks.png',
+  'plants-terrarium': '/images/gifts/plants-terrarium.png',
+  'card-games': '/images/gifts/card-games.png',
+}
+const getGiftImage = (category) => GIFT_IMAGES[category] || null
+
 const AMZN = (q) => `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=zenmonkeystud-20`
 const BOOKSHOP = (t) => `https://bookshop.org/search?keywords=${encodeURIComponent(t)}&affiliate=122560`
 const BAM = (t) => `https://www.booksamillion.com/search?query=${encodeURIComponent(t)}&id=101712536-11173806`
@@ -30,7 +87,7 @@ RULES:
 8. reflect_back: write a short phrase starting with "Based on the [clue]..." that confirms you understood their specific input. If no specific clue was given, use "Based on what you told us..."
 
 Respond with ONLY valid JSON. No text before or after:
-{"gift_name":"Very specific product name","tagline":"Personal to their situation","reflect_back":"Based on the [specific thing]...","why_theyll_love_it":"2-3 sentences specific to what you know about them","price_range":"$X-Y","amazon_search":"specific Amazon search term","what_people_say":"2-3 sentence summary of what buyers report. Genuine tone, not fake quote.","occasion_note":"one sentence on why this fits the occasion if relevant","book":{"title":"Real book title","author":"Real author","why":"why this fits them specifically","type":"novel / graphic novel / field guide / coffee table book / etc"},"alternatives":[{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Book or reading gift","reason":"for the reader in them","search":"amazon search"}]}`
+{"gift_name":"Very specific product name","tagline":"Personal to their situation","reflect_back":"Based on the [specific thing]...","why_theyll_love_it":"2-3 sentences specific to what you know about them","price_range":"$X-Y","image_category":"one of: lego-building, art-supplies, science-stem, outdoor-sports, books-reading, board-games-puzzles, music-instruments, pretend-play-dolls, tech-gadgets, collectibles-figures, fashion-accessories, cooking-baking, animals-nature, creative-writing-journal, retro-vintage-gaming, sports-equipment, bath-spa-wellness, garden-plants, pets-animals, travel-adventure, cars-vehicles, space-astronomy, dinosaurs-fossils, superheroes-comics, princess-fairy, construction-tools, dance-performance, yoga-mindfulness, photography-art, magic-tricks, coding-robotics, slime-sensory, candles-home, jewelry-making, fitness-exercise, camping-outdoors, ocean-beach, theater-drama, mystery-detective, fantasy-dragons, history-culture, math-logic, languages-culture, charity-giving, experience-tickets, subscription-box, handmade-craft, food-snacks, plants-terrarium, card-games","amazon_search":"very specific Amazon search term — include brand name, model name, and key descriptor so the first result is the exact product. E.g. 'Thames Kosmos Chemistry C3000 kit' not just 'chemistry kit'","what_people_say":"2-3 sentence summary of what buyers report. Genuine tone, not fake quote.","occasion_note":"one sentence on why this fits the occasion if relevant","book":{"title":"Real book title","author":"Real author","why":"why this fits them specifically","type":"novel / graphic novel / field guide / coffee table book / etc"},"alternatives":[{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Specific alt","reason":"why this direction","search":"amazon search"},{"name":"Book or reading gift","reason":"for the reader in them","search":"amazon search"}]}`
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
 const Btn = ({ children, onClick, href, target, variant='primary', size='md', style:s={} }) => {
@@ -122,6 +179,10 @@ function SiteFooter() {
             <a key={l} href={h} style={{fontSize:12,color:'rgba(255,255,255,.4)',textDecoration:'none',fontFamily:F}}>{l}</a>
           ))}
         </div>
+      </div>
+      <div style={{maxWidth:1000,margin:'8px auto 0',display:'flex',gap:16}}>
+        <a href="/about" style={{fontSize:11,color:'rgba(255,255,255,.35)',fontFamily:F,textDecoration:'none'}}>About</a>
+        <a href="/privacy" style={{fontSize:11,color:'rgba(255,255,255,.35)',fontFamily:F,textDecoration:'none'}}>Privacy Policy</a>
       </div>
     </footer>
   )
@@ -416,6 +477,8 @@ function ResultView({ gift, answers, onNew }) {
   const [productImage, setProductImage] = useState(null)
   const [productUrl, setProductUrl] = useState(null)
 
+  const [altImages, setAltImages] = React.useState({})
+
   React.useEffect(() => {
     if (!gift?.amazon_search) return
     fetch('/api/amazon-image', {
@@ -428,8 +491,25 @@ function ResultView({ gift, answers, onNew }) {
       if (d.image_url) setProductImage(d.image_url)
       if (d.product_url) setProductUrl(d.product_url)
     })
-    .catch(() => {}) // silent fail, falls back to no image
+    .catch(() => {})
   }, [gift?.amazon_search])
+
+  React.useEffect(() => {
+    if (!gift?.alternatives?.length) return
+    gift.alternatives.forEach((alt, i) => {
+      if (!alt.search) return
+      fetch('/api/amazon-image', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ keywords: alt.search })
+      })
+      .then(r => r.json())
+      .then(d => {
+        if (d.image_url) setAltImages(prev => ({...prev, [i]: { image_url: d.image_url, product_url: d.product_url }}))
+      })
+      .catch(() => {})
+    })
+  }, [gift?.alternatives])
   const recipientLabel = RELATIONSHIPS.find(r=>r.v===answers.relationship)?.l || 'them'
   const occasionLabel = OCCASIONS.find(o=>o.v===answers.occasion)?.l || ''
   const shareUrl = window.location.href
@@ -518,9 +598,12 @@ function ResultView({ gift, answers, onNew }) {
             <p style={{margin:'0 0 14px',fontSize:12,color:T.gray,fontFamily:F2}}>Not quite right? These go in a different direction.</p>
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:10}}>
               {gift.alternatives.map((alt,i) => (
-                <a key={i} href={AMZN(alt.search)} target="_blank" rel="noopener"
+                <a key={i} href={altImages[i]?.product_url || AMZN(alt.search)} target="_blank" rel="noopener"
                   style={{background:T.navyLight,borderRadius:12,padding:'14px',textDecoration:'none',display:'block',border:`1.5px solid ${T.border}`,transition:'all .15s'}}>
-                  <div style={{fontSize:22,marginBottom:8}}>🎁</div>
+                  {altImages[i]?.image_url
+                    ? <img src={altImages[i].image_url} alt={alt.name} style={{width:'100%',height:100,objectFit:'contain',borderRadius:8,marginBottom:8,background:'#fff'}} onError={e=>e.target.style.display='none'}/>
+                    : <div style={{fontSize:22,marginBottom:8}}>🎁</div>
+                  }
                   <div style={{fontSize:13,fontWeight:800,color:T.navy,marginBottom:4,fontFamily:F,lineHeight:1.3}}>{alt.name}</div>
                   <div style={{fontSize:11,color:T.gray,lineHeight:1.4,marginBottom:8,fontFamily:F2}}>{alt.reason}</div>
                   <div style={{fontSize:11,fontWeight:700,color:T.gold,fontFamily:F}}>See on Amazon →</div>
@@ -541,6 +624,10 @@ function ResultView({ gift, answers, onNew }) {
           </div>
         </Card>
 
+        <div style={{background:'#F0FAF4',border:'1.5px solid #D8F3DC',borderRadius:12,padding:'14px 18px',marginBottom:14,textAlign:'center'}}>
+          <p style={{margin:'0 0 8px',fontSize:13,fontWeight:700,color:'#2D6A4F',fontFamily:F}}>Need an activity to do with this gift?</p>
+          <a href="https://whatshouldmykiddo.com" target="_blank" rel="noopener" style={{background:'#2D6A4F',color:'#fff',borderRadius:50,padding:'8px 18px',fontSize:12,fontWeight:800,fontFamily:F,textDecoration:'none',display:'inline-block'}}>✨ Try whatshouldmykiddo.com →</a>
+        </div>
         <AdUnit style={{marginBottom:14}}/>
 
         <div style={{display:'flex',gap:10}}>
