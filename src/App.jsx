@@ -67,7 +67,7 @@ const GIFT_IMAGES = {
 }
 const getGiftImage = (category) => GIFT_IMAGES[category] || null
 
-const AMZN = (q) => `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=zenmonkeystud-20`
+const AMZN = (q) => `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=whatgit-20`
 const BOOKSHOP = (t) => `https://bookshop.org/search?keywords=${encodeURIComponent(t)}&affiliate=122560`
 const BAM = (t) => `https://www.booksamillion.com/search?query=${encodeURIComponent(t)}&id=101712536-11173806`
 
@@ -251,10 +251,10 @@ const OCCASIONS = [
 ]
 
 // ── QUIZ VIEW ──────────────────────────────────────────────────────────────────
-function QuizView({ onComplete }) {
+function QuizView({ onComplete, prefilledClue }) {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState({
-    relationship:'', age:'', interests:[], clue:'', budget:'', occasion:''
+    relationship:'', age:'', interests:[], clue: prefilledClue || '', budget:'', occasion:''
   })
 
   const totalSteps = 5
@@ -804,6 +804,7 @@ export default function App() {
   const [answers, setAnswers] = useState(null)
   const [error, setError] = useState('')
   const [loadStage, setLoadStage] = useState(0)
+  const [prefilledClue, setPrefilledClue] = useState('')
   const timerRef = React.useRef(null)
 
   React.useEffect(() => {
@@ -820,6 +821,15 @@ export default function App() {
       if (a.relationship && a.budget) {
         setTimeout(() => generate(a), 100)
       }
+    }
+    // Pre-fill gift finder from ?prompt= URL param
+    // e.g. whatgiftshouldibuy.com/?prompt=gift+for+a+mom+who+loves+gardening
+    const urlPrompt = new URLSearchParams(window.location.search).get('prompt')
+    if (urlPrompt) {
+      setPrefilledClue(decodeURIComponent(urlPrompt))
+      setStage('quiz')
+      if (history.replaceState) history.replaceState(null, '', location.pathname)
+      if (typeof gtag !== 'undefined') gtag('event', 'prompt_prefill', { prompt: urlPrompt.slice(0, 100) })
     }
   }, [])
 
@@ -883,7 +893,7 @@ export default function App() {
     <>
       <SiteHeader onHome={reset}/>
       {stage === 'home' && <HomePage onStart={()=>setStage('quiz')}/>}
-      {stage === 'quiz' && <QuizView onComplete={generate}/>}
+      {stage === 'quiz' && <QuizView onComplete={generate} prefilledClue={prefilledClue}/>}
       {stage === 'loading' && <LoadingView stage={loadStage} clue={answers?.clue}/>}
       {stage === 'result' && gift && <ResultView gift={gift} answers={answers} onNew={reset}/>}
       {stage === 'error' && <ErrorView msg={error} onRetry={()=>generate(answers)} onBack={()=>setStage('quiz')}/>}
